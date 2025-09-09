@@ -1,15 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:location_task/api/api_constant.dart';
-import 'package:location_task/location_service/location_handler.dart';
 import 'package:location_task/widgets/custom_toast.dart';
 
 class LoginScrvice {
   final Dio _dio = Dio();
-  Future<bool> loginApi(String email, String password) async {
+  Future<bool> loginApi(
+    String email,
+    String password,
+    double? lat,
+    double? lng,
+  ) async {
     try {
-      final token = '';
-      _dio.options.headers["Authorization"] = "Bearer $token";
-      _dio.options.contentType = 'multipart/form-data';
+      _dio.options.contentType = 'application/json';
       _dio.interceptors.add(
         LogInterceptor(
           requestBody: true,
@@ -22,23 +24,13 @@ class LoginScrvice {
         ),
       );
 
-      // final Map<String, dynamic> formDataMap = {
-      //   'email': ''.toString(),
-      //   'password': ''.toString(),
-      //   'lng': ''.toString(),
-      //   'lat': ''.toString(),
-      //   'browser_id': ''.toString(),
-      // };
-
-      // final formData = FormData.fromMap(formDataMap);
-
       final response = await _dio.post(
         ApiConstant.baseUrl + ApiConstant.login,
         data: {
           'email': email.toString(),
           'password': password.toString(),
-          'lng': '${LocationHandler.currentPosition?.longitude}',
-          'lat': '${LocationHandler.currentPosition?.latitude}',
+          'lng': lng,
+          'lat': lat,
           'browser_id': '3417089516'.toString(),
         },
 

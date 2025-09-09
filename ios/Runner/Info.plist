@@ -45,5 +45,18 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>App ko location chahiye login aur tracking ke liye jab app open ho.</string>
+
+	<!-- Agar aapko background location chahiye -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>App ko aapki location background me bhejne ke liye permission chahiye.</string>
+
+	<!-- background mode (sirf agar background location chahiye) -->
+	<key>UIBackgroundModes</key>
+	<array>
+	<string>location</string>
+	<string>fetch</string>
+	</array>
 </dict>
 </plist>

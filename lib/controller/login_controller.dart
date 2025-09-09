@@ -6,9 +6,11 @@ class LoginController extends GetxController {
   Future<void> loginApi({
     required String email,
     required String password,
+    double? lat,
+    double? lng,
   }) async {
     isLeadAdding.value = true;
-    final result = await LoginScrvice().loginApi(email, password);
+    final result = await LoginScrvice().loginApi(email, password, lat, lng);
     if (result != null) {
       Get.back();
     } else {}
