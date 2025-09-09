@@ -1,17 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:location_task/api/api_constant.dart';
-import 'package:location_task/model/login_model.dart';
+import 'package:location_task/helper/storage_helper.dart';
+import 'package:location_task/model/location_model.dart';
 import 'package:location_task/widgets/custom_toast.dart';
 
-class LoginScrvice {
+class LocationApiService {
   final Dio _dio = Dio();
-  Future<LoginModel?> loginApi(
-    String email,
-    String password,
-    double? lat,
-    double? lng,
-  ) async {
+  Future<LocationModel?> locationApi() async {
     try {
+      var token = StorageHelper.getToken();
+      _dio.options.headers["Authorization"] = "Bearer $token";
       _dio.options.contentType = 'application/json';
       _dio.interceptors.add(
         LogInterceptor(
@@ -26,14 +24,8 @@ class LoginScrvice {
       );
 
       final response = await _dio.post(
-        ApiConstant.baseUrl + ApiConstant.login,
-        data: {
-          'email': email.toString(),
-          'password': password.toString(),
-          'lng': lng,
-          'lat': lat,
-          'browser_id': '3417089516'.toString(),
-        },
+        ApiConstant.baseUrl + ApiConstant.location,
+        data: {"user_id": 2035, "lat": 1.3565952, "lng": 103.809024},
 
         options: Options(
           validateStatus: (s) => s != null && s < 500,
@@ -42,8 +34,7 @@ class LoginScrvice {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        CustomToast().showCustomToast(response.data['message']);
-        return LoginModel.fromJson(response.data);
+        return LocationModel.fromJson(response.data);
       } else if (response.statusCode == 400) {
         CustomToast().showCustomToast(response.data['message'].toString());
         return null;
