@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:location_task/helper/storage_helper.dart';
 import 'package:location_task/services/login_scrvice.dart';
+import 'package:location_task/view/home_screen.dart';
 
 class LoginController extends GetxController {
   var isLeadAdding = false.obs;
@@ -39,7 +40,7 @@ class LoginController extends GetxController {
       );
 
       await StorageHelper.setToken(result.data?.token ?? '');
-      Get.back();
+      Get.offAll(() => const HomeScreen());
     } else {}
     isLeadAdding.value = false;
   }

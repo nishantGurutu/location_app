@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:location_task/helper/storage_helper.dart';
 import 'package:location_task/location_service/location_service.dart';
-import 'package:location_task/view/login.dart';
+import 'package:location_task/view/splash_screen.dart';
 
 Future<void> main() async {
   await WidgetsFlutterBinding.ensureInitialized();
   await StorageHelper.initialize();
-  await LocationService.initialize();
+  // await LocationService.initialize();
   runApp(const MyApp());
 }
 
@@ -29,7 +28,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           ),
-          home: LoginScreen(),
+          home: SplashScreen(),
         );
       },
     );
