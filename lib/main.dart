@@ -2,19 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:location_task/helper/storage_helper.dart';
 import 'package:location_task/location_service/location_service.dart';
 import 'package:location_task/view/login.dart';
 
 Future<void> main() async {
   await WidgetsFlutterBinding.ensureInitialized();
-  // try {
-  //   Position pos =
-  await LocationService.getCurrentLocation();
-  //   print("App Start Location: ${pos.latitude}, ${pos.longitude}");
-  // } catch (e) {
-  //   print("Error getting location at startup: $e");
-  // }
-
+  await StorageHelper.initialize();
+  await LocationService.initialize();
   runApp(const MyApp());
 }
 

@@ -1,84 +1,59 @@
-import 'dart:async';
-
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
+import 'package:geocoding/geocoding.dart' as geocode;
+import 'package:location_task/helper/storage_helper.dart';
 
 class LocationService {
-  /// Check service + request permissions if needed.
-  /// Returns true if location service is enabled and permission granted.
-  static Future<bool> checkAndRequestPermission() async {
-    // 1) Service (GPS) enabled?
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  static late Location location;
+  static late LocationData locationData;
+  static late bool serviceEnabled;
+  static late PermissionStatus permissionStatus;
+
+  static initialize() async {
+    location = Location();
+    serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
-      // Let user know to enable location from device settings.
-      return false;
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
     }
 
-    // 2) Permission status
-    LocationPermission permission = await Geolocator.checkPermission();
+    permissionStatus = await location.hasPermission();
+    if (permissionStatus == PermissionStatus.denied) {
+      permissionStatus = await location.requestPermission();
+      if (permissionStatus != PermissionStatus.granted) {
+        return;
+      }
+    }
 
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permission denied (user declined).
+    locationData = await location.getLocation();
+    if (StorageHelper.getUserLocationName() == null) {
+      if (locationData.latitude != null && locationData.longitude != null) {
+        List<geocode.Placemark> placemarks = await geocode
+            .placemarkFromCoordinates(
+              locationData.latitude!,
+              locationData.longitude!,
+            );
+        StorageHelper.setUserLocationName(placemarks[0].subLocality ?? '');
+      }
+    }
+  }
+
+  static Future<bool> requestLocationService() async {
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
         return false;
       }
     }
 
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are permanently denied, open app settings (or instruct user).
+    permissionStatus = await location.requestPermission();
+    if (permissionStatus == PermissionStatus.granted) {
+      locationData = await location.getLocation();
+      return true;
+    } else {
       return false;
     }
-
-    // granted (either whileInUse or always)
-    return permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always;
-  }
-
-  /// Get current single location (throws if permission/service problem)
-  static Future<Position> getCurrentLocation({int timeoutSeconds = 15}) async {
-    final ok = await checkAndRequestPermission();
-    if (!ok) {
-      throw Exception('Location service disabled or permission denied');
-    }
-
-    final pos =
-        await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-        ).timeout(
-          Duration(seconds: timeoutSeconds),
-          onTimeout: () => throw TimeoutException('Location request timed out'),
-        );
-
-    return pos;
-  }
-
-  /// Start listening to location updates (distanceFilter in meters)
-  static StreamSubscription<Position> startLocationStream(
-    void Function(Position) onData, {
-    LocationAccuracy accuracy = LocationAccuracy.best,
-    int distanceFilter = 50,
-  }) {
-    final locationSettings = LocationSettings(
-      accuracy: accuracy,
-      distanceFilter: distanceFilter,
-    );
-
-    final stream = Geolocator.getPositionStream(
-      locationSettings: locationSettings,
-    );
-    final sub = stream.listen(
-      onData,
-      onError: (e) {
-        // handle errors if needed
-        // print('Location stream error: $e');
-      },
-    );
-
-    return sub;
-  }
-
-  /// Open app settings (useful if permission is deniedForever)
-  static Future<bool> openAppSettings() async {
-    return await Geolocator.openAppSettings();
   }
 }

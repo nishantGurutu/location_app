@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:location_task/controller/login_controller.dart';
-import 'package:location_task/location_service/location_service.dart';
+import 'package:location_task/location_service/location_handler.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,11 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _fetchLocation() async {
     loding.value = true;
     try {
-      final pos = await LocationService.getCurrentLocation();
-      // setState(() {
+      final pos = await LocationHandler.determinePosition(context);
       _latitude?.value = pos.latitude;
       _longitude?.value = pos.longitude;
-      // });
       loding.value = false;
     } catch (e) {
       print("Location error: $e");
@@ -51,7 +49,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(title: const Text('Login'), backgroundColor: Colors.white),
       body: Obx(
         () => loding.value == true
             ? Center(child: CircularProgressIndicator())
